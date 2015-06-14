@@ -1,7 +1,7 @@
 #include <Adafruit_GFX.h>   // Core graphics library
 #include <RGBmatrixPanel.h> // Hardware-specific library
 
-#define CLK 11  // MUST be on PORTB! (Use pin 11 on Mega)
+#define CLK 11  // MUST be on PORTB! (Use pin 11 on Mega // 8 on Uno)
 #define LAT A3
 #define OE  9
 #define A   A0
@@ -10,10 +10,10 @@
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 
 const uint8_t left = 5, right = 4; // Buttons
-uint8_t ballx = 16, bally = 14; // Current location of the ball
-int speedx = -1, speedy = -1; // Ball's speed & direction
-uint8_t vaus = 15; // (The thing that we move) Vause's left pixel location
-uint8_t board [][31] = {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, // Board 1:brick, 0: no brick
+uint8_t ballx = 16, bally = 14; // De locatie van de bal als het spel begint
+int speedx = -1, speedy = -1; // Ball's snelheid en beweging
+uint8_t bar = 15; // bar (het gedeelte dat we bewegen)
+uint8_t board [][31] = {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, // Board 1:brick, 0: geen brick
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -41,7 +41,7 @@ matrix.begin();
 
 }
 
-/* Paints the bricks in the display*/
+// Tekent de steentjes (bricks) op het display
 void paintBricks() {
   for(uint8_t i = 0; i<32; i++) {
     for(uint8_t j = 0; j<32; j++){
@@ -55,34 +55,34 @@ void paintBricks() {
   }
 }
 
-/* Paints Vaus in the display*/
-void paintVaus() {
-  matrix.drawPixel(vaus, 15, matrix.Color333(153,50,204));
-  matrix.drawPixel(vaus + 1,15, matrix.Color333(153,50,204));
-  matrix.drawPixel(vaus + 2,15, matrix.Color333(153,50,204));
-  matrix.drawPixel(vaus - 1,15, matrix.Color333(153,50,204));
-  matrix.drawPixel(vaus - 2,15, matrix.Color333(153,50,204));
+// Teken de bar op het scherm
+void paintBar() {
+  matrix.drawPixel(bar, 15, matrix.Color333(153,50,204));
+  matrix.drawPixel(bar + 1,15, matrix.Color333(153,50,204));
+  matrix.drawPixel(bar + 2,15, matrix.Color333(153,50,204));
+  matrix.drawPixel(bar - 1,15, matrix.Color333(153,50,204));
+  matrix.drawPixel(bar - 2,15, matrix.Color333(153,50,204));
 }
 
-/* Paints the ball in the display*/
+// Teken het balletje op het scherm
 void paintBall() {
  matrix.drawPixel(ballx, bally, matrix.Color333(5, 0, 0)); 
 }
 
-/* Checks the collisions*/
+// Checken op collisions met bovenkant, zijkanten en onderkant
 void checkCollisions() {
   if(numBricks > 0) {
-    // Bottom 
+    // Onderkant 
     if(bally == 14) {
-      // Check if Vaus is here
-      if(ballx == vaus || ballx == vaus + 1) {
+      // Kijken of de bar hier is, zo niet dan is speler game over
+      if(ballx == bar || ballx == bar + 1) {
         speedy = -1;
-	if(ballx == vaus)
+	if(ballx == bar)
 	  speedx = -1;
 	else speedx = 1;
       } else gameOver();
     }
-    // Top
+    // Bovenkant van het scherm
     if(bally == 0){
       if(board[bally][ballx]) {
 	board[bally][ballx] = 0;
@@ -90,7 +90,7 @@ void checkCollisions() {
       }
       speedy = 1;
     }
-    // Side walls
+    // Zijkanten van het scherm
     if( ballx == 0 || ballx == 31){
       if(board[bally][ballx]) {
         board[bally][ballx] = 0;
@@ -99,7 +99,7 @@ void checkCollisions() {
       }
       speedx = -speedx;
     }
-    // Everything else
+    // Als bal het board raakt, gaan de bricks weg
     if(ballx != 0 && ballx != 31 && bally != 0 && bally != 31){
       if(board[bally][ballx]) {
         board[bally][ballx] = 0;
@@ -155,17 +155,17 @@ void win() {
 void loop() {
    //matrix.clear();
    paintBricks();
-   paintVaus();
+   paintBar();
    paintBall();
    
   // matrix.writeDisplay();
    if(!digitalRead(left)){
-     if(vaus > 0)
-       vaus--; 
+     if(bar > 0)
+       bar--; 
    }
    if(!digitalRead(right)){
-     if(vaus + 1 < 11)
-       vaus++;
+     if(bar + 1 < 11)
+       bar++;
    }
    checkCollisions();
    delay(150); 
