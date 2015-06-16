@@ -9,7 +9,13 @@
 #define C   A2
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 
-const uint8_t left = 5, right = 4; // Buttons
+//TODO: Uitvinden waarom hij naar links beweegt (hoogstwaarschijnlijk staat poort 5 dan wel open). && waarom niet naar rechts met zelfde instellingen. Waar zit nog meer de fout dat het scherm maar 11 pixels is?!!
+//TODO: NOTE: Als hij nog wel naar rechts kan, geeft hij meteen Game Over, waarom?
+//TODO: NOTE: Als balx op 15 staat, doet hij het nog wel (als de rechter button ook ingeplugd is) anders meteen game over
+//TODO: NOTE: Als de code voor de balk naar de rechterkant naar boven staat, doet ie het wel naar rechts - maar niet meer naar links (zelfde fout). Ligt waarschijnlijk aan de .writeDisplay() code die nog gefixt moet worden.
+
+
+const uint8_t left = 5, right = A7; // Buttons
 uint8_t ballx = 15, bally = 14; // De locatie van de bal als het spel begint
 int speedx = -1, speedy = -1; // Ball's snelheid en beweging
 uint8_t bar = 15; // Bar (het gedeelte dat we bewegen)
@@ -39,6 +45,7 @@ matrix.begin();
  pinMode(left, INPUT);
  digitalWrite(left, HIGH);
 
+
 }
 
 // Tekent de steentjes (bricks) op het display
@@ -47,7 +54,7 @@ void paintBricks() {
     for(uint8_t j = 0; j<32; j++){
       if(board[i][j] == 1){
         if(i % 2 == 0)
-          matrix.drawPixel(j,i,matrix.Color333(1,1,0)); // Consider: hits to break block depending on the colour
+          matrix.drawPixel(j,i,matrix.Color333(10,10,10)); // Consider: hits to break block depending on the colour
         else
           matrix.drawPixel(j,i, matrix.Color333(5, 5, 1));
       }
@@ -71,7 +78,7 @@ void paintBall() {
 
 // Checken op collisions met bovenkant, zijkanten en onderkant
 void checkCollisions() {
-  if(numBricks > 0) {
+  if(numBricks > 0) { //als de bricks/steentjes meer dan 0 is, doe dit
     // Onderkant 
     if(bally == 14) {
       // Kijken of de bar hier is, zo niet dan is speler game over
@@ -80,7 +87,8 @@ void checkCollisions() {
 	if(ballx == bar)
 	  speedx = -1;
 	else speedx = 1;
-      } else gameOver();
+      } 
+      else gameOver();
     }
     // Bovenkant van het scherm
     if(bally == 0){
@@ -109,7 +117,8 @@ void checkCollisions() {
     }
     ballx += speedx;
     bally += speedy;
-  } else win();
+  } 
+  else win(); //anders (als alle bricks/steentjes op zijn) gewonnen
 }
 
 void gameOver() {
@@ -171,18 +180,21 @@ void loop() {
    paintBall();
    
    
-    //matrix.writeDisplay(); TODO: Kijken hoe dit gefixt kan worden, hij pakt deze command niet
+   //matrix.writeDisplay(); TODO: Kijken hoe dit gefixt kan worden, hij pakt deze command niet
    if(!digitalRead(left)){
      if(bar > 0)
        bar--; 
    }
+   
    if(!digitalRead(right)){
-     if(bar + 1 < 11)
+     if(bar + 1 < 31)
        bar++;
    }
+   
    checkCollisions();
    delay(200); 
 }
+
 
 
 
