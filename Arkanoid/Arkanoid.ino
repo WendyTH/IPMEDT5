@@ -10,9 +10,9 @@
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 
 const uint8_t left = 5, right = 4; // Buttons
-uint8_t ballx = 16, bally = 14; // De locatie van de bal als het spel begint
+uint8_t ballx = 15, bally = 14; // De locatie van de bal als het spel begint
 int speedx = -1, speedy = -1; // Ball's snelheid en beweging
-uint8_t bar = 15; // bar (het gedeelte dat we bewegen)
+uint8_t bar = 15; // Bar (het gedeelte dat we bewegen)
 uint8_t board [][31] = {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, // Board 1:brick, 0: geen brick
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -113,13 +113,18 @@ void checkCollisions() {
 }
 
 void gameOver() {
+ 
+    matrix.fillRect(0, 0, 32, 16, matrix.Color333(0, 0, 0)); //clear het scherm
+      
     matrix.setTextColor(matrix.Color333(7,0,0));
-    matrix.print('G');
+    matrix.print('*');
     matrix.setTextColor(matrix.Color333(7,4,0)); 
-    matrix.print('A');
+    matrix.print('G');
     matrix.setTextColor(matrix.Color333(7,7,0));
-    matrix.print('M');
+    matrix.print('A');
     matrix.setTextColor(matrix.Color333(4,7,0)); 
+    matrix.print('M');
+    matrix.setTextColor(matrix.Color333(0,7,0));  
     matrix.print('E');
     
     matrix.setCursor(1, 9);   // next line
@@ -131,6 +136,10 @@ void gameOver() {
     matrix.print('E');
     matrix.setTextColor(matrix.Color333(4,0,7)); 
     matrix.print("R");
+    matrix.setTextColor(matrix.Color333(7,0,4)); 
+    matrix.print("*");
+    
+    delay(99999999); //TODO: Terug naar beginscherm, hij maakt nu alleen een delay zodat de game niet verder gaat
 }
 
 void win() {
@@ -150,15 +159,19 @@ void win() {
     matrix.print('N');
     matrix.setTextColor(matrix.Color333(4,0,7)); 
     matrix.print("!");
+    
+    delay(99999999); //TODO: Terug naar beginscherm, hij maakt nu alleen een delay zodat de game niet verder gaat
 }
 
 void loop() {
-   //matrix.clear();
+   matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
+  //matrix.clear();
    paintBricks();
    paintBar();
    paintBall();
    
-  // matrix.writeDisplay();
+   
+    //matrix.writeDisplay(); TODO: Kijken hoe dit gefixt kan worden, hij pakt deze command niet
    if(!digitalRead(left)){
      if(bar > 0)
        bar--; 
@@ -168,6 +181,8 @@ void loop() {
        bar++;
    }
    checkCollisions();
-   delay(150); 
-
+   delay(200); 
 }
+
+
+
