@@ -1,0 +1,19 @@
+Git project download
+git clone [HTTPSLINK] [FOLDERLOCATIE]
+
+Git Pullen
+git fetch
+git pull
+
+Git pushen
+git status
+git add --all     of als je 1 file wil git add [FILENAME]
+git status
+git commit -m “[COMMIT MESSAGE”
+git push
+
+Git branch switchen
+git branch [BRANCHNAME]
+git checkout [BRANCHNAME]
+OF
+git checkout -b [BRANCHNAME]      zo maak je een nieuwe branch en ga je er meteen in
