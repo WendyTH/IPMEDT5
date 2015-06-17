@@ -14,11 +14,12 @@ RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 //TODO: NOTE: Als balx op 15 staat, doet hij het nog wel (als de rechter button ook ingeplugd is) anders meteen game over
 //TODO: NOTE: Als de code voor de balk naar de rechterkant naar boven staat, doet ie het wel naar rechts - maar niet meer naar links (zelfde fout). Ligt waarschijnlijk aan de .writeDisplay() code die nog gefixt moet worden.
 
+//TODO: Als de bar helemaal naar de zijkant is stopt hij bij 3 ipv bij 5 - dit moet nog gefixt worden. Waarschijnlijk bij if bar < 0, maar als je bar -2 doet, is de speler ook af.
 
-const uint8_t left = 5, right = A7; // Buttons
-uint8_t ballx = 15, bally = 14; // De locatie van de bal als het spel begint
+const uint8_t left = 5, right = 6; // Buttons
+uint8_t ballx = 14, bally = 14; // De locatie van de bal als het spel begint
 int speedx = -1, speedy = -1; // Ball's snelheid en beweging
-uint8_t bar = 15; // Bar (het gedeelte dat we bewegen)
+uint8_t bar = 15; // Bar (het gedeelte dat we bewegen) Dit is de y-as, hij zit op de laagste LED rij
 uint8_t board [][31] = {{1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1}, // Board 1:brick, 0: geen brick
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
                        {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -64,9 +65,9 @@ void paintBricks() {
 
 // Teken de bar op het scherm
 void paintBar() {
-  matrix.drawPixel(bar, 15, matrix.Color333(153,50,204));
+  matrix.drawPixel(bar + 2,15, matrix.Color333(153,50,204)); //(y, x, color)
   matrix.drawPixel(bar + 1,15, matrix.Color333(153,50,204));
-  matrix.drawPixel(bar + 2,15, matrix.Color333(153,50,204));
+  matrix.drawPixel(bar, 15, matrix.Color333(153,50,204)); // middelste pixel van de bar
   matrix.drawPixel(bar - 1,15, matrix.Color333(153,50,204));
   matrix.drawPixel(bar - 2,15, matrix.Color333(153,50,204));
 }
@@ -121,6 +122,29 @@ void checkCollisions() {
   else win(); //anders (als alle bricks/steentjes op zijn) gewonnen
 }
 
+void loop() {
+   matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
+  //matrix.clear();
+   paintBricks();
+   paintBar();
+   paintBall();
+   
+   //matrix.writeDisplay(); TODO: Kijken hoe dit gefixt kan worden, hij pakt deze command niet
+   if(!digitalRead(left)){
+     if(bar > 0)
+       bar--; 
+   }
+   
+   if(!digitalRead(right)){
+     if(bar + 1 < 31)
+       bar++;
+   }
+   
+   checkCollisions();
+   delay(200); 
+}
+
+//Als speler game over is, toon dit op scherm
 void gameOver() {
  
     matrix.fillRect(0, 0, 32, 16, matrix.Color333(0, 0, 0)); //clear het scherm
@@ -151,6 +175,7 @@ void gameOver() {
     delay(99999999); //TODO: Terug naar beginscherm, hij maakt nu alleen een delay zodat de game niet verder gaat
 }
 
+//Als speler gewonnen is, toon dit op scherm
 void win() {
     matrix.setTextColor(matrix.Color333(7,0,0));
     matrix.print('Y');
@@ -170,29 +195,6 @@ void win() {
     matrix.print("!");
     
     delay(99999999); //TODO: Terug naar beginscherm, hij maakt nu alleen een delay zodat de game niet verder gaat
-}
-
-void loop() {
-   matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
-  //matrix.clear();
-   paintBricks();
-   paintBar();
-   paintBall();
-   
-   
-   //matrix.writeDisplay(); TODO: Kijken hoe dit gefixt kan worden, hij pakt deze command niet
-   if(!digitalRead(left)){
-     if(bar > 0)
-       bar--; 
-   }
-   
-   if(!digitalRead(right)){
-     if(bar + 1 < 31)
-       bar++;
-   }
-   
-   checkCollisions();
-   delay(200); 
 }
 
 
