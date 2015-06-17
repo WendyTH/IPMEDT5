@@ -16,10 +16,10 @@ RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 
 //TODO: Als de bar helemaal naar de zijkant is stopt hij bij 3 ipv bij 5 - dit moet nog gefixt worden. Waarschijnlijk bij if bar < 0, maar als je bar -2 doet, is de speler ook af.
 
-const uint8_t left = 3, right = A7; // Buttons
-uint8_t ballx = 17, bally = 14; // De locatie van de bal als het spel begint
+const uint8_t left = 5, right = 4; // Buttons
+uint8_t ballx = 20, bally = 14; // De locatie van de bal als het spel begint
 int speedx = -1, speedy = -1; // Ball's snelheid en beweging
-uint8_t bar = 15; // Bar (het gedeelte dat we bewegen) Dit is de y-as, hij zit op de laagste LED rij
+uint8_t bar = 20; // Bar (het gedeelte dat we bewegen) Dit is de y-as, hij zit op de laagste LED rij
 uint8_t board [][32] = {{0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0}, // Board 1:brick, 0: geen brick
                        {0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0},
                        {0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0},
@@ -44,8 +44,10 @@ void setup() {
    pinMode(right, INPUT);
    digitalWrite(right, HIGH);
    pinMode(left, INPUT);
-   digitalWrite(left, HIGH);
+   digitalWrite(left, HIGH);  
 }
+
+
 
 // Tekent de steentjes (bricks) op het display
 void paintBricks() {
@@ -63,11 +65,11 @@ void paintBricks() {
 
 // Teken de bar op het scherm
 void paintBar() {
-  matrix.drawPixel(bar + 2,15, matrix.Color333(0,0,7)); //(y, x, color)
-  matrix.drawPixel(bar + 1,15, matrix.Color333(0,0,7));
+  matrix.drawPixel(bar + 4,15, matrix.Color333(0,0,7)); //(y, x, color)
+  matrix.drawPixel(bar + 3,15, matrix.Color333(0,0,7));
   matrix.drawPixel(bar, 15, matrix.Color333(0,0,7)); // middelste pixel van de bar
-  matrix.drawPixel(bar - 1,15, matrix.Color333(0,0,7));
-  matrix.drawPixel(bar - 2,15, matrix.Color333(0,0,7));
+  matrix.drawPixel(bar + 2,15, matrix.Color333(0,0,7));
+  matrix.drawPixel(bar + 1,15, matrix.Color333(0,0,7));
 }
 
 // Teken het balletje op het scherm
@@ -98,16 +100,16 @@ void checkCollisions() {
       speedy = 1;
     }
     // Zijkanten van het scherm
-    if( ballx == 0 || ballx == 32){
+    if( ballx == 0 || ballx == 31){
       if(board[bally][ballx]) {
         board[bally][ballx] = 0;
-	numBricks--;
-	speedy = 1;
+	      numBricks--;
+	      speedy = 1;
       }
       speedx = -speedx;
     }
     // Als bal het board raakt, gaan de bricks weg
-    if(ballx != 0 && ballx != 32 && bally != 0 && bally != 32){
+    if(ballx != 0 && ballx != 32 && bally != 0 && bally != 31){
       if(board[bally][ballx]) {
         board[bally][ballx] = 0;
         numBricks--;
@@ -126,17 +128,22 @@ void loop() {
    paintBricks();
    paintBar();
    paintBall();
-   
-      if(!digitalRead(right)){
-     if(bar + 1 < 32)
-       bar++;
-   }
-   
-   //matrix.writeDisplay(); TODO: Kijken hoe dit gefixt kan worden, hij pakt deze command niet
+
+
+      //matrix.writeDisplay(); //TODO: Kijken hoe dit gefixt kan worden, hij pakt deze command niet
    if(!digitalRead(left)){
-     if(bar - 1 > 0)
-       bar--; 
+     if(bar >= 0){
+       bar = bar -2 ; 
+     }
    }
+    if(!digitalRead(right)){
+        if(bar <= 28){
+          bar = bar + 2;
+        }
+         
+    }
+   
+
    
 
    
