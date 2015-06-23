@@ -91,7 +91,7 @@
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
  
-#define melodyPin 3
+#define melodyPin 18
 
 
 #define CLK 11  // MUST be on PORTB! (Use pin 11 on Mega // 8 on Uno)
@@ -124,13 +124,27 @@ uint8_t board [][32] = {{0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
 uint8_t numBricks = 186; // count of bricks
-
+int melodybrick[] = {
+  NOTE_F3
+};
+//Brick main them tempo
+int tempobrick[] = {
+  30, 
+};
+int melodybar[] = {
+  NOTE_G5
+};
+//Bar main them tempo
+int tempobar[] = {
+  30, 
+};
 void setup() {
   matrix.begin();
   pinMode(right, INPUT);
 
   pinMode(left, INPUT);
- pinMode(3, OUTPUT);//buzzer
+ pinMode(18, OUTPUT);//buzzer
+
 }
 
 
@@ -140,10 +154,10 @@ void paintBricks() {
   for (uint8_t i = 0; i < 32; i++) {
     for (uint8_t j = 0; j < 32; j++) {
       if (board[i][j] == 1) {
-        if (i % 2 == 0)
-          matrix.drawPixel(j, i, matrix.Color333(4, 0, 7)); // Consider: hits to break block depending on the colour
+        if (i % 2== 0)
+          matrix.drawPixel(j, i, matrix.Color333(8, 110, 100)); // Consider: hits to break block depending on the colour
         else
-          matrix.drawPixel(j, i, matrix.Color333(7, 4, 0));
+          matrix.drawPixel(j, i, matrix.Color333(0, 7, 0));
       }
     }
   }
@@ -173,6 +187,7 @@ void checkCollisions() {
       // Kijken of de bar hier is, zo niet dan is speler game over
       if (ballx == bar || ballx == bar + 1 || ballx == bar + 2 || ballx == bar - 1 || ballx == bar - 2) {
         speedy = -1;
+        sing(3);
       }
       else {
         gameOver();
@@ -199,6 +214,7 @@ void checkCollisions() {
         board[bally][ballx] = 0;
         numBricks--;
         speedy = 1;
+        sing(2);
       }
     }
     ballx += speedx;
@@ -211,14 +227,17 @@ int buttonState = 0;
 int buttonState2 = 0;
 
 void loop() {
+  
+  
+
   matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
   paintBricks();
   paintBar();
   paintBall();
-
+  
   buttonState = digitalRead(right);
   buttonState2 = digitalRead(left);
-
+  
   if (buttonState == HIGH) {
     digitalWrite(right, HIGH);
 
@@ -242,6 +261,8 @@ void loop() {
       }
     }
   }
+  
+
   //  if (!digitalRead(left)) {
   //    if (bar >= 3) {
   //      bar--;
@@ -254,12 +275,18 @@ void loop() {
   //
   //  }
   checkCollisions();
-  delay(200);
-}
+  
+  delay(150);
+  } 
 
+
+void playsong(){
+ 
+ sing(2); 
+  
+}
 //Als speler game over is, toon dit op scherm
 void gameOver() {
-
 
  
   
@@ -313,16 +340,63 @@ void win() {
   delay(99999999); //TODO: Terug naar beginscherm, hij maakt nu alleen een delay zodat de game niet verder gaat
 }
   int melody[] = {
- NOTE_G4, NOTE_G4,NOTE_G4, NOTE_DS4, NOTE_AS4, NOTE_G4, NOTE_DS4, NOTE_AS4, NOTE_G4, NOTE_D5, NOTE_D5, NOTE_D5, NOTE_DS5, NOTE_AS4, NOTE_FS4, NOTE_DS4, NOTE_AS4, NOTE_G4, NOTE_G5, NOTE_G4, NOTE_G4, NOTE_G5, NOTE_FS5, NOTE_F5, NOTE_E5, NOTE_DS5, NOTE_E5, 0, NOTE_GS4, NOTE_CS5, NOTE_C5, NOTE_B4, NOTE_AS4, NOTE_A4, NOTE_AS4, 0, NOTE_DS4, NOTE_FS4, NOTE_DS4, NOTE_FS4, NOTE_AS4, NOTE_G4, NOTE_AS4, NOTE_D5, NOTE_G5, NOTE_G4, NOTE_G4, NOTE_G5, NOTE_FS5, NOTE_F5, NOTE_E5, NOTE_DS5, NOTE_E5, 0, NOTE_GS4, NOTE_CS5, NOTE_C5, NOTE_B4, NOTE_AS4, NOTE_A4, NOTE_AS4, 0, NOTE_DS4, NOTE_FS4, NOTE_DS4, NOTE_AS4, NOTE_G4, NOTE_DS4, NOTE_AS4, NOTE_G4
-
+NOTE_DS8,NOTE_D8,NOTE_CS8,NOTE_C8
 };
 int tempo[] = {
-   4, 4, 4, 6, 16, 4, 6, 16, 2, 4, 4, 4, 6, 16, 4, 6, 16, 2, 4, 6, 16, 4, 6, 16, 16, 16, 8, 8, 8, 4, 6, 16, 16, 16, 8, 8, 8, 4, 6, 16, 4, 6, 16, 2, 4, 6, 16, 4, 6, 16, 16, 16, 8, 8, 8, 4, 6, 16, 16, 16, 8, 8, 8, 4, 6, 16, 4, 6, 16, 2,
+  10,10,10,3,
 };
 
 
-int song = 0;
+
+
+  int song=0;
 void sing(int s) {
+song = s;
+  if (song == 2) {
+    Serial.println(" 'Brick Theme'");
+    int size = sizeof(melodybrick) / sizeof(int);
+    for (int thisNote = 0; thisNote < size; thisNote++) {
+ 
+      // to calculate the note duration, take one second
+      // divided by the note type.
+      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      int noteDuration = 1000 / tempobrick[thisNote];
+ 
+      buzz(melodyPin, melodybrick[thisNote], noteDuration);
+ 
+      // to distinguish the notes, set a minimum time between them.
+      // the note's duration + 30% seems to work well:
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+ 
+      // stop the tone playing:
+      buzz(melodyPin, 0, noteDuration);
+ 
+    }
+  }
+song = s;
+  if (song == 3) {
+    Serial.println(" 'Bar Theme'");
+    int size = sizeof(melodybar) / sizeof(int);
+    for (int thisNote = 0; thisNote < size; thisNote++) {
+ 
+      // to calculate the note duration, take one second
+      // divided by the note type.
+      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      int noteDuration = 1000 / tempobar[thisNote];
+ 
+      buzz(melodyPin, melodybar[thisNote], noteDuration);
+ 
+      // to distinguish the notes, set a minimum time between them.
+      // the note's duration + 30% seems to work well:
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+ 
+      // stop the tone playing:
+      buzz(melodyPin, 0, noteDuration);
+ 
+    }
+  }
   // iterate over the notes of the melody:
   song = s;
  
