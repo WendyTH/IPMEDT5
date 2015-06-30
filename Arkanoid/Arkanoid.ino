@@ -90,7 +90,7 @@
 #define NOTE_CS8 4435
 #define NOTE_D8  4699
 #define NOTE_DS8 4978
- 
+
 #define melodyPin 18
 
 
@@ -102,10 +102,10 @@
 #define C   A2
 RGBmatrixPanel matrix(A, B, C, CLK, LAT, OE, false);
 
-const uint8_t left = 5, right = 4; // Buttons
-uint8_t ballx = 5, bally = 14; // De locatie van de bal als het spel begint
+const uint8_t left = 5, right = 4, reset = 19; // Buttons
+uint8_t ballx = 10, bally = 14; // De locatie van de bal als het spel begint
 int speedx = -1, speedy = -1; // Ball's snelheid en beweging
-uint8_t bar = 5; // Bar (het gedeelte dat we bewegen) Dit is de y-as, hij zit op de laagste LED rij
+uint8_t bar = 10; // Bar (het gedeelte dat we bewegen) Dit is de y-as, hij zit op de laagste LED rij
 uint8_t board [][32] = {{0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0}, // Board 1:brick, 0: geen brick
   {0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0},
   {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0},
@@ -129,39 +129,90 @@ int melodybrick[] = {
 };
 //Brick main them tempo
 int tempobrick[] = {
-  30, 
+  30,
 };
 int melodybar[] = {
   NOTE_G5
 };
 //Bar main them tempo
 int tempobar[] = {
-  30, 
+  30,
 };
 void setup() {
-  matrix.begin();
+
   pinMode(right, INPUT);
-
+  pinMode(reset, INPUT);
+  digitalWrite(reset, HIGH);
   pinMode(left, INPUT);
- pinMode(18, OUTPUT);//buzzer
-
+  pinMode(18, OUTPUT);//buzzer
+  matrix.begin();
+  welkomScreen();
 }
 
+void welkomScreen() {
+
+  matrix.setTextSize(2);
+  matrix.setCursor(11, 1);   // next line
+  matrix.setTextColor(matrix.Color333(255, 0, 0));
+  sing(3);
+  matrix.print('3');
+  delay(1000);
+
+  matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
+  matrix.setTextSize(2);
+  matrix.setCursor(11, 1);   // next line
+  matrix.setTextColor(matrix.Color333(255, 255, 0));
+  sing(3);
+  matrix.print('2');
+  delay(1000);
+
+  matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
+  matrix.setTextSize(2);
+  matrix.setCursor(11, 1);   // next line
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  sing(3);
+  matrix.print('1');
+  delay(1000);
+
+  matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
+
+  matrix.setTextSize(1);
+  matrix.setCursor(1, 5);   // next line
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print('S');
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print('T');
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print('A');
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print("R");
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print("T");
+  sing(4);
+  delay(500);
+
+  matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
+
+}
 
 
 // Tekent de steentjes (bricks) op het display
 void paintBricks() {
+
+
   for (uint8_t i = 0; i < 32; i++) {
     for (uint8_t j = 0; j < 32; j++) {
       if (board[i][j] == 1) {
-        if (i % 2== 0)
-          matrix.drawPixel(j, i, matrix.Color333(8, 110, 100)); // Consider: hits to break block depending on the colour
+        if (i % 2 == 0)
+          matrix.drawPixel(j, i, matrix.Color333(4, 0, 7)); // Consider: hits to break block depending on the colour
         else
-          matrix.drawPixel(j, i, matrix.Color333(0, 7, 0));
+          matrix.drawPixel(j, i, matrix.Color333(76, 153, 0));
       }
     }
   }
 }
+
+
 
 // Teken de bar op het scherm
 void paintBar() {
@@ -174,7 +225,7 @@ void paintBar() {
 
 // Teken het balletje op het scherm
 void paintBall() {
-  matrix.drawPixel(ballx, bally, matrix.Color333(5, 0, 0));
+  matrix.drawPixel(ballx, bally, matrix.Color333(255, 255, 255));
 }
 
 // Checken op collisions met bovenkant, zijkanten en onderkant
@@ -187,6 +238,8 @@ void checkCollisions() {
       // Kijken of de bar hier is, zo niet dan is speler game over
       if (ballx == bar || ballx == bar + 1 || ballx == bar + 2 || ballx == bar - 1 || ballx == bar - 2) {
         speedy = -1;
+
+
         sing(3);
       }
       else {
@@ -196,23 +249,23 @@ void checkCollisions() {
     // Bovenkant van het scherm
     if (bally == 0) {
       if (board[bally][ballx]) {
-        numBricks--;
+        //numBricks--;
       }
       speedy = 1;
     }
     // Zijkanten van het scherm
     if ( ballx == 0 || ballx == 31) {
       if (board[bally][ballx]) {
-        numBricks--;
+        //numBricks--;
         speedy = 1;
       }
       speedx = -speedx;
     }
     // Als bal het board raakt, gaan de bricks weg
-    if (ballx != 0 && ballx != 32 && bally != 0 && bally != 32) {
+    if (ballx != -1 && ballx != 31 && bally != -1 && bally != 31) {
       if (board[bally][ballx]) {
         board[bally][ballx] = 0;
-        numBricks--;
+        //numBricks--;
         speedy = 1;
         sing(2);
       }
@@ -226,24 +279,26 @@ void checkCollisions() {
 int buttonState = 0;
 int buttonState2 = 0;
 
-void loop() {
-  
-  
+boolean themesong = true;
 
+void loop() {
+   
+   
   matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
   paintBricks();
   paintBar();
   paintBall();
-  
   buttonState = digitalRead(right);
   buttonState2 = digitalRead(left);
   
+
   if (buttonState == HIGH) {
     digitalWrite(right, HIGH);
 
     if (digitalRead(right)) {
       if (bar <= 28) {
         bar++;
+  
       }
 
     }
@@ -256,68 +311,98 @@ void loop() {
       if (digitalRead(left)) {
         if (bar >= 3) {
           bar--;
+      
         }
 
       }
     }
   }
-  
 
-  //  if (!digitalRead(left)) {
-  //    if (bar >= 3) {
-  //      bar--;
-  //    }
-  //  }
-  //  if (!digitalRead(right)) {
-  //    if (bar <= 28) {
-  //      bar++;
-  //    }
-  //
-  //  }
   checkCollisions();
-  
   delay(150);
-  } 
+}
 
 
-void playsong(){
- 
- sing(2); 
-  
+
+
+
+
+void playsong() {
+
+  sing(2);
+
 }
 //Als speler game over is, toon dit op scherm
 void gameOver() {
 
- 
-  
-  matrix.fillRect(0, 0, 32, 16, matrix.Color333(0, 0, 0)); //clear het scherm
 
-  matrix.setTextColor(matrix.Color333(7, 0, 0));
-  matrix.print('*');
-  matrix.setTextColor(matrix.Color333(7, 4, 0));
+  matrix.fillScreen(matrix.Color333(0, 0, 0)); //vul het scherm naar zwart om het scherm te hertekenen
+  matrix.fillRect(0, 0, 32, 16, matrix.Color333(0, 0, 0)); //clear het scherm
+  matrix.setCursor(1, 0);   // next line
+  matrix.setTextColor(matrix.Color333(255, 0, 0));
+  matrix.print('X');
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
   matrix.print('G');
-  matrix.setTextColor(matrix.Color333(7, 7, 0));
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
   matrix.print('A');
-  matrix.setTextColor(matrix.Color333(4, 7, 0));
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
   matrix.print('M');
-  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
   matrix.print('E');
 
   matrix.setCursor(1, 9);   // next line
-  matrix.setTextColor(matrix.Color333(0, 7, 7));
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
   matrix.print('O');
-  matrix.setTextColor(matrix.Color333(0, 4, 7));
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
   matrix.print('V');
-  matrix.setTextColor(matrix.Color333(0, 0, 7));
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
   matrix.print('E');
-  matrix.setTextColor(matrix.Color333(4, 0, 7));
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
   matrix.print("R");
-  matrix.setTextColor(matrix.Color333(7, 0, 4));
-  matrix.print("*");
-sing(1);
- delay(99999999);
-  //TODO: Terug naar beginscherm, hij maakt nu alleen een delay zodat de game niet verder gaat
+  matrix.setTextColor(matrix.Color333(255, 0, 0));
+  matrix.print("X");
+  sing(1);
+
+  delay(3000);
+
+  matrix.fillRect(0, 0, 32, 16, matrix.Color333(0, 0, 0)); //clear het scherm
+  delay(500);
+
+  matrix.setTextWrap(false);
+  matrix.setCursor(1, 0);   // next line
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
+  matrix.print('P');
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
+  matrix.print('R');
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
+  matrix.print('E');
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
+  matrix.print('S');
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
+  matrix.print('S');
+  matrix.setTextColor(matrix.Color333(255, 255, 255));
+
+
+  matrix.setCursor(1, 9);   // next line
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print('P');
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print('L');
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print('A');
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print("Y");
+  matrix.setTextColor(matrix.Color333(0, 7, 0));
+  matrix.print(">");
+
+  delay(100000000);
+
+
 }
+
+
+
+
 //Als speler gewonnen is, toon dit op scherm
 void win() {
   matrix.setTextColor(matrix.Color333(7, 0, 0));
@@ -339,89 +424,169 @@ void win() {
 
   delay(99999999); //TODO: Terug naar beginscherm, hij maakt nu alleen een delay zodat de game niet verder gaat
 }
-  int melody[] = {
-NOTE_DS8,NOTE_D8,NOTE_CS8,NOTE_C8
+int melody[] = {
+  NOTE_DS8, NOTE_D8, NOTE_CS8, NOTE_C8
 };
 int tempo[] = {
-  10,10,10,3,
+  10, 10, 10, 3,
+};
+
+int introSound[] = {
+NOTE_C8, NOTE_CS8, NOTE_D8, NOTE_DS8
+  
+//  NOTE_G7, NOTE_G7, 0, NOTE_C8,
+//  0, NOTE_C7, NOTE_E7, 0,
+//  NOTE_G7, 0, 0,  0,
+//  NOTE_G6, 0, 0, 0,
+//
+//  NOTE_C7, 0, 0, NOTE_G6,
+//  0, 0, NOTE_E6, 0,
+//  0, NOTE_A6, 0, NOTE_B6,
+//  0, NOTE_AS6, NOTE_A6, 0,
+//
+//  NOTE_G6, NOTE_E7, NOTE_G7,
+//  NOTE_A7, 0, NOTE_F7, NOTE_G7,
+//  0, NOTE_E7, 0, NOTE_C7,
+//  NOTE_D7, NOTE_B6, 0, 0,
+//
+//  NOTE_C7, 0, 0, NOTE_G6,
+//  0, 0, NOTE_E6, 0,
+//  0, NOTE_A6, 0, NOTE_B6,
+//  0, NOTE_AS6, NOTE_A6, 0,
+//
+//  NOTE_G6, NOTE_E7, NOTE_G7,
+//  NOTE_A7, 0, NOTE_F7, NOTE_G7,
+//  0, NOTE_E7, 0, NOTE_C7,
+//  NOTE_D7, NOTE_B6, 0, 0
+};
+
+int tempoIntro[] = {
+
+  3,10,10,10
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//
+//  9, 9, 9,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//
+//  9, 9, 9,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
+//  12, 12, 12, 12,
 };
 
 
-
-
-  int song=0;
+int song = 0;
 void sing(int s) {
-song = s;
+  song = s;
   if (song == 2) {
     Serial.println(" 'Brick Theme'");
     int size = sizeof(melodybrick) / sizeof(int);
     for (int thisNote = 0; thisNote < size; thisNote++) {
- 
+
       // to calculate the note duration, take one second
       // divided by the note type.
       //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
       int noteDuration = 1000 / tempobrick[thisNote];
- 
+
       buzz(melodyPin, melodybrick[thisNote], noteDuration);
- 
+
       // to distinguish the notes, set a minimum time between them.
       // the note's duration + 30% seems to work well:
       int pauseBetweenNotes = noteDuration * 1.30;
       delay(pauseBetweenNotes);
- 
+
       // stop the tone playing:
       buzz(melodyPin, 0, noteDuration);
- 
+
     }
   }
-song = s;
+  song = s;
   if (song == 3) {
     Serial.println(" 'Bar Theme'");
     int size = sizeof(melodybar) / sizeof(int);
     for (int thisNote = 0; thisNote < size; thisNote++) {
- 
+
       // to calculate the note duration, take one second
       // divided by the note type.
       //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
       int noteDuration = 1000 / tempobar[thisNote];
- 
+
       buzz(melodyPin, melodybar[thisNote], noteDuration);
- 
+
       // to distinguish the notes, set a minimum time between them.
       // the note's duration + 30% seems to work well:
       int pauseBetweenNotes = noteDuration * 1.30;
       delay(pauseBetweenNotes);
- 
+
       // stop the tone playing:
       buzz(melodyPin, 0, noteDuration);
- 
+
     }
   }
   // iterate over the notes of the melody:
   song = s;
- 
- 
-   if (song==1) {
- 
+
+
+  if (song == 1) {
+
     Serial.println(" 'Imperial March'");
     int size = sizeof(melody) / sizeof(int);
     for (int thisNote = 0; thisNote < size; thisNote++) {
- 
+
       // to calculate the note duration, take one second
       // divided by the note type.
       //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
       int noteDuration = 800 / tempo[thisNote];
- 
+
       buzz(melodyPin, melody[thisNote], noteDuration);
- 
+
       // to distinguish the notes, set a minimum time between them.
       // the note's duration + 30% seems to work well:
       int pauseBetweenNotes = noteDuration * 1.30;
       delay(pauseBetweenNotes);
- 
+
       // stop the tone playing:
       buzz(melodyPin, 0, noteDuration);
- 
+
+    }
+  }
+
+  if (song == 4) {
+
+    Serial.println(" 'Imperial March'");
+    int size = sizeof(introSound) / sizeof(int);
+    for (int thisNote = 0; thisNote < size; thisNote++) {
+
+      // to calculate the note duration, take one second
+      // divided by the note type.
+      //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+      int noteDuration = 800 / tempoIntro[thisNote];
+
+      buzz(melodyPin, introSound[thisNote], noteDuration);
+
+      // to distinguish the notes, set a minimum time between them.
+      // the note's duration + 30% seems to work well:
+      int pauseBetweenNotes = noteDuration * 1.30;
+      delay(pauseBetweenNotes);
+
+      // stop the tone playing:
+      buzz(melodyPin, 0, noteDuration);
+
     }
   }
 }
