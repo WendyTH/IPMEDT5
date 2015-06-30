@@ -94,7 +94,7 @@
 #define melodyPin 18
 
 
-#define CLK 11  // MUST be on PORTB! (Use pin 11 on Mega // 8 on Uno)
+#define CLK 11  // Moet op PortB zijn! (Gebruik pin 11 op Mega // 8 op Uno)
 #define LAT A3
 #define OE  9
 #define A   A0
@@ -123,7 +123,7 @@ uint8_t board [][32] = {{0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
-uint8_t numBricks = 186; // count of bricks
+uint8_t numBricks = 186; // hoeveelheid steentjes/bricks
 int melodybrick[] = {
   NOTE_F3
 };
@@ -199,12 +199,11 @@ void welkomScreen() {
 // Tekent de steentjes (bricks) op het display
 void paintBricks() {
 
-
   for (uint8_t i = 0; i < 32; i++) {
     for (uint8_t j = 0; j < 32; j++) {
       if (board[i][j] == 1) {
         if (i % 2 == 0)
-          matrix.drawPixel(j, i, matrix.Color333(4, 0, 7)); // Consider: hits to break block depending on the colour
+          matrix.drawPixel(j, i, matrix.Color333(4, 0, 7)); // Overweegt hoe vaak de brick geraakt moet worden naar de kleur
         else
           matrix.drawPixel(j, i, matrix.Color333(76, 153, 0));
       }
@@ -422,7 +421,7 @@ void win() {
   matrix.setTextColor(matrix.Color333(4, 0, 7));
   matrix.print("!");
 
-  delay(99999999); //TODO: Terug naar beginscherm, hij maakt nu alleen een delay zodat de game niet verder gaat
+  delay(99999999);
 }
 int melody[] = {
   NOTE_DS8, NOTE_D8, NOTE_CS8, NOTE_C8
